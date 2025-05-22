@@ -1,7 +1,7 @@
 [package]
 name = "gamecode-backend"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 license = "MIT"
 authors = ["Ed Sweeney <ed@onextent.com>"]
 description = "Backend trait and common types for LLM integrations in the gamecode ecosystem"
