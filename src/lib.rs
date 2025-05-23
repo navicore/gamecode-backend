@@ -117,7 +117,11 @@ impl Message {
         }
     }
 
-    pub fn with_tool_calls(role: MessageRole, text: impl Into<String>, tool_calls: Vec<ToolCall>) -> Self {
+    pub fn with_tool_calls(
+        role: MessageRole,
+        text: impl Into<String>,
+        tool_calls: Vec<ToolCall>,
+    ) -> Self {
         let mut content = vec![ContentBlock::Text(text.into())];
         content.extend(tool_calls.into_iter().map(ContentBlock::ToolCall));
         Self { role, content }
@@ -147,7 +151,10 @@ pub enum MessageRole {
 pub enum ContentBlock {
     Text(String),
     ToolCall(ToolCall),
-    ToolResult { tool_call_id: String, result: String },
+    ToolResult {
+        tool_call_id: String,
+        result: String,
+    },
 }
 
 /// A tool call made by the LLM
