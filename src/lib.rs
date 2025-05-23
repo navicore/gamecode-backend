@@ -2,8 +2,34 @@ use anyhow::Result;
 use futures_util::Stream;
 use serde::{Deserialize, Serialize};
 use std::pin::Pin;
+use std::sync::Arc;
 use std::time::Duration;
 use uuid::Uuid;
+
+/// Status events that backends can emit during processing
+#[derive(Debug, Clone)]
+pub enum BackendStatus {
+    /// Retry attempt being made
+    RetryAttempt {
+        attempt: usize,
+        max_attempts: usize,
+        delay_ms: u64,
+        reason: String,
+    },
+    /// Request is being rate limited
+    RateLimited {
+        attempt: usize,
+        max_attempts: usize,
+        delay_ms: u64,
+    },
+    /// Non-retryable error occurred
+    NonRetryableError {
+        message: String,
+    },
+}
+
+/// Callback function type for status updates
+pub type StatusCallback = Arc<dyn Fn(BackendStatus) + Send + Sync>;
 
 /// Core trait for LLM backend implementations
 #[async_trait::async_trait]
@@ -63,13 +89,28 @@ pub enum BackoffStrategy {
 }
 
 /// A chat request to send to an LLM backend
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ChatRequest {
     pub messages: Vec<Message>,
     pub model: Option<String>, // If None, use backend default
     pub tools: Option<Vec<Tool>>,
     pub inference_config: Option<InferenceConfig>,
     pub session_id: Option<Uuid>,
+    #[serde(skip)]
+    pub status_callback: Option<StatusCallback>,
+}
+
+impl std::fmt::Debug for ChatRequest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ChatRequest")
+            .field("messages", &self.messages)
+            .field("model", &self.model)
+            .field("tools", &self.tools)
+            .field("inference_config", &self.inference_config)
+            .field("session_id", &self.session_id)
+            .field("status_callback", &self.status_callback.as_ref().map(|_| "<callback>"))
+            .finish()
+    }
 }
 
 /// A complete response from an LLM backend
