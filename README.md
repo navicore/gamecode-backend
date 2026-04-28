@@ -1,3 +1,8 @@
+<!-- ghmig:moved -->
+> **This repository has moved to [https://git.navicore.tech/navicore/gamecode-backend](https://git.navicore.tech/navicore/gamecode-backend).**
+>
+> The GitHub copy is archived and no longer maintained.
+
 # gamecode-backend
 
 Backend trait and common types for LLM integrations in the gamecode ecosystem.
